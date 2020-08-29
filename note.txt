@@ -1,0 +1,11 @@
+获取轮播图数据
+api/config.js:封装一个axios实例（官网查找复制）
+api/index.js:封装一个模块用于定义各种请求
+    导入config.js，
+home.vue导入index.js
+ methods: {
+    async getlunbo() {
+      var res = await getLunBoData();
+      
+    },
+  },
