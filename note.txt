@@ -9,3 +9,11 @@ home.vue导入index.js
       
     },
   },
+
+
+  图文欣赏
+  使用工具：
+// TreeSelect:分类选择  ImagePreview :图片预览
+import { TreeSelect, ImagePreview } from "vant";
+
+定义一个数组，里面需要text属性，

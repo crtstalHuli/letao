@@ -1,55 +1,263 @@
 <template>
-  <div>
-    <!-- 头部 -->
-    <Sticky>
-      <van-nav-bar title="商品列表" left-text="" left-arrow> </van-nav-bar>
-    </Sticky>
+    <div class="goodsDesc_container">
+        <!-- 轮播图 -->
+        <van-swipe class="my-swipe" :autoplay="3000" indicator-color="white" v-if="isLunbo">
+            <van-swipe-item v-for="image in lunboimages" :key="image.src">
+                <img :src="image.src" alt="" />
+            </van-swipe-item>
+        </van-swipe>
+        <van-empty image="error" description="暂无图片" v-else />
+        <div class="goodsInfo">
+            <div class="goodsName">
+                <span>{{ goodsInfo.title }}</span>
+            </div>
+            <van-divider />
+            <div class="price">
+                <span class="marketPrice"
+                    >市场价：&yen;{{ goodsInfo.market_price }}</span
+                >
+                <span class="shopPrice">
+                    本店价：
+                    <span class="value">&yen;{{ goodsInfo.sell_price }}</span>
+                </span>
+            </div>
+            <div class="goodsNumber">
+                <span>购买数量：</span>
+                <van-stepper v-model="value" />
+            </div>
+        </div>
+        <div class="goodsItem">
+            <van-divider>其他信息</van-divider>
+            <div class="goodsOtherInfo">
+                <span>商品货号：{{ goodsInfo.goods_no }}</span>
+                <span>库存情况：{{ goodsInfo.stock_quantity }}</span>
+                <span
+                    >上架时间：{{
+                        goodsInfo.add_time | dataFormat("YYYY-MM-DD")
+                    }}</span
+                >
+            </div>
+        </div>
+        <div class="goodsItem">
+            <van-divider>介绍</van-divider>
+            <div class="content" v-html="goodsDesc.content"></div>
+        </div>
 
-    <!-- 商品详情 -->
-    <div class="goodsdetail_container" v-html="goodsDesc.content">
-      <!-- 轮播图 -->
-      <!-- <van-swipe class="my-swipe" :autoplay="3000" indicator-color="white">
-        <van-swipe-item>1</van-swipe-item>
-        <van-swipe-item>2</van-swipe-item>
-        <van-swipe-item>3</van-swipe-item>
-        <van-swipe-item>4</van-swipe-item>
-      </van-swipe> -->
-
+        <!-- 商品导航 -->
+        <van-goods-action>
+            <van-goods-action-icon icon="chat-o" text="客服" dot />
+            <van-goods-action-icon
+                icon="cart-o"
+                text="购物车"
+                :badge="count"
+                to="/mycar"
+            />
+            <van-goods-action-button
+                color="#be99ff"
+                type="warning"
+                text="加入购物车"
+                @click="addmycar"
+            />
+            <van-goods-action-button
+                color="#7232dd"
+                type="danger"
+                text="立即购买"
+            />
+        </van-goods-action>
     </div>
-  </div>
 </template>
 
 <script>
-import { Sticky, NavBar, Swipe, SwipeItem } from "vant";
-import { getGoodsDescData } from "@/api/index.js";
+import {
+    Swipe,
+    SwipeItem,
+    GoodsAction,
+    GoodsActionIcon,
+    GoodsActionButton,
+    Icon,
+    Divider,
+    Stepper,
+    Empty
+} from "vant";
+
+import {
+    getGoodsDescData,
+    getthgetumbimages,
+    getgoodsinfo
+} from "@/api/index.js";
+
 export default {
-  props: ["goodsid"],
-  data() {
-    return {
-      goodsDesc: "",
-    };
-  },
-  components: {
-    Sticky,
-    "van-nav-bar": NavBar,
-    "van-swipe":Swipe,
-    "van-swipe-item":SwipeItem
-  },
-  methods: {
-    async getGoodsDesc() {
-      let res = await getGoodsDescData(this.goodsid);
-      this.goodsDesc = res.message[0];
-      console.log(res.message[0]);
+    props: ["goodsid"],
+    data() {
+        return {
+            count: 0,
+            lunboimages: [],
+            isLunbo:true,
+            goodsInfo: "",
+            goodsDesc: "",
+            value: 1,
+            carData:[]
+        };
     },
-  },
-  created() {
-    this.getGoodsDesc();
-  },
+    components: {
+        "van-swipe": Swipe,
+        "van-swipe-item": SwipeItem,
+        "van-goods-action": GoodsAction,
+        "van-goods-action-icon": GoodsActionIcon,
+        "van-goods-action-button": GoodsActionButton,
+        icon: Icon,
+        "van-swipe": Swipe,
+        "van-swipe-item": SwipeItem,
+        "van-divider": Divider,
+        "van-stepper": Stepper,
+        "van-empty":Empty
+    },
+    methods: {
+        // 获取商品图文
+        async getGoodsDesc() {
+            let res = await getGoodsDescData(this.goodsid);
+            this.goodsDesc = res.message[0];
+        },
+        // 获取轮播图数据
+        async getthgetumbimagesData() {
+            let { message } = await getthgetumbimages(this.goodsid);
+            message.length == 0 ? this.isLunbo = false : this.isLunbo = true;
+
+            this.lunboimages = message;
+        },
+        // 获取商品参数，价格，标题
+        async getgoodsinfoData() {
+            let { message } = await getgoodsinfo(this.goodsid);
+            this.goodsInfo = message;
+        },
+        // 加入购物车
+        addmycar() {
+            // 查询购物车中的商品
+            // let carData = JSON.parse(localStorage.getItem('goods') || '[]');
+            let carData = JSON.parse(localStorage.getItem('goods'))
+            console.log(carData);
+
+            // let goodsData = {
+            //     id: this.goodsid,
+            //     img: this.lunboimages[0],
+            //     title: this.goodsInfo.title,
+            //     priced: this.goodsInfo.sell_price,
+            //     count: this.value
+            // };
+            // carData.push(goodsData)
+
+            // localStorage.setItem('goods',JSON.stringify(this.carData));
+            // let data = JSON.parse(localStorage.getItem('goods'));
+            // console.log(data);
+
+
+
+
+        }
+    },
+    created() {
+        this.$parent.showNavBar({ title: "商品详情" });
+        this.$parent.hideHeader();
+        this.$parent.showFooter();
+        this.getGoodsDesc();
+        this.getthgetumbimagesData();
+        this.getgoodsinfoData();
+
+
+    }
 };
 </script>
 
 <style lang="scss" scoped>
-.goodsdetail_container {
-  padding: 5px 5px 50px 5px;
+.goodsDesc_container {
+    padding: 5px 5px 50px 5px;
+
+    .van-goods-action {
+        bottom: 50px;
+    }
+
+    .van-swipe {
+        height: 240px;
+        border-radius: 5px;
+        background-color: #fff;
+
+        .van-swipe-item {
+            display: flex;
+            justify-content: center;
+            img {
+                width: 254px;
+                height: 100%;
+            }
+        }
+    }
+
+    .goodsInfo {
+        padding: 8px;
+        margin: 10px 0;
+        border-radius: 5px;
+        background-color: #fff;
+
+        .goodsName {
+            color: #333;
+        }
+
+        .van-divider {
+            margin: 16px 0;
+            color: #969799;
+            border-color: #ebedf0;
+        }
+
+        .price {
+            margin-bottom: 15px;
+            color: #333;
+
+            .marketPrice {
+                margin-right: 20px;
+                text-decoration: line-through;
+            }
+            .shopPrice {
+                .value {
+                    color: red;
+                    font-weight: 700;
+                }
+            }
+        }
+
+        .goodsNumber {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+
+            margin-bottom: 10px;
+            color: #333;
+
+            .van-stepper {
+                display: inline-block;
+            }
+        }
+    }
+
+    .goodsItem {
+        padding: 8px;
+        margin: 10px 0;
+        border-radius: 5px;
+        background-color: #fff;
+
+        .goodsOtherInfo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content /deep/ img {
+            width: 100%;
+
+            // 行内元素对齐
+            vertical-align: top;
+        }
+        .content /deep/ table {
+            width: 100%;
+             vertical-align: top;
+        }
+    }
 }
 </style>
