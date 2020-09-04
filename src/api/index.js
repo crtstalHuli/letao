@@ -64,3 +64,8 @@ export async function getcatelistData(id) {
 export async function getthumbimagesData(id) {
     return await instance.get(`/getthumbimages/${id}`);
 }
+
+// 获取购物车数据 {{$store.getters.getAllId}}
+export async function getShopCarsData(carIds) {
+    return await instance.get(`/getshopcarlist/${carIds}`);
+}

@@ -24,7 +24,7 @@
         <!-- 底部 -->
         <Tabbar v-model="active" v-show="isFooter">
             <TabbarItem to="/home" icon="wap-home-o">首页</TabbarItem>
-            <TabbarItem to="/mycar" icon="cart-o" :badge="mycarCount">购物车</TabbarItem>
+            <TabbarItem to="/mycar" icon="cart-o" :badge="$store.getters.getTotalNum">购物车</TabbarItem>
             <TabbarItem to="/user" icon="user-o">我的乐淘</TabbarItem>
         </Tabbar>
     </div>
@@ -72,7 +72,8 @@ export default {
         },
         hideFooter(){
             this.isFooter = false;
-        }
+        },
+
 
     }
 };

@@ -5,12 +5,16 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: {
-
+        name:'huli',
+        age:18
     },
     mutations: {
 
     },
-    actions: {
+    getters:{
+
+    },
+    actions:{
 
     }
 })

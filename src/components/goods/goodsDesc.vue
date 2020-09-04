@@ -1,7 +1,7 @@
 <template>
     <div class="goodsDesc_container">
         <!-- 轮播图 -->
-        <van-swipe class="my-swipe" :autoplay="3000" indicator-color="white" v-if="isLunbo">
+        <van-swipe class="my-swipe" :autoplay="3000" :indicator-color="'#ccc'" v-if="isLunbo">
             <van-swipe-item v-for="image in lunboimages" :key="image.src">
                 <img :src="image.src" alt="" />
             </van-swipe-item>
@@ -49,7 +49,7 @@
             <van-goods-action-icon
                 icon="cart-o"
                 text="购物车"
-                :badge="count"
+                :badge="$store.getters.getTotalNum"
                 to="/mycar"
             />
             <van-goods-action-button
@@ -93,7 +93,7 @@ export default {
             count: 0,
             lunboimages: [],
             isLunbo:true,
-            goodsInfo: "",
+            goodsInfo: {},
             goodsDesc: "",
             value: 1,
             carData:[]
@@ -132,37 +132,24 @@ export default {
         },
         // 加入购物车
         addmycar() {
-            // 查询购物车中的商品
-            // let carData = JSON.parse(localStorage.getItem('goods') || '[]');
-            let carData = JSON.parse(localStorage.getItem('goods'))
-            console.log(carData);
+            let goods = {
+                id:this.goodsInfo.id,
+                number:this.value,
+                price:this.goodsInfo.sell_price,
+                selected:true
+            };
 
-            // let goodsData = {
-            //     id: this.goodsid,
-            //     img: this.lunboimages[0],
-            //     title: this.goodsInfo.title,
-            //     priced: this.goodsInfo.sell_price,
-            //     count: this.value
-            // };
-            // carData.push(goodsData)
-
-            // localStorage.setItem('goods',JSON.stringify(this.carData));
-            // let data = JSON.parse(localStorage.getItem('goods'));
-            // console.log(data);
-
-
-
-
+            this.$store.commit('addCar',goods);
         }
     },
     created() {
         this.$parent.showNavBar({ title: "商品详情" });
         this.$parent.hideHeader();
-        this.$parent.showFooter();
+        this.$parent.hideFooter();
+
         this.getGoodsDesc();
         this.getthgetumbimagesData();
         this.getgoodsinfoData();
-
 
     }
 };
@@ -171,10 +158,6 @@ export default {
 <style lang="scss" scoped>
 .goodsDesc_container {
     padding: 5px 5px 50px 5px;
-
-    .van-goods-action {
-        bottom: 50px;
-    }
 
     .van-swipe {
         height: 240px;

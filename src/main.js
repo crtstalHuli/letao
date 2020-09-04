@@ -1,6 +1,5 @@
 import Vue from "vue";
 import App from "./App.vue";
-import store from './store.js'
 import router from "./router";
 // 全局过滤器
 import "@/util/filter.js";
@@ -19,9 +18,10 @@ Vue.use(Lazyload, {
     lazyComponent: true
 });
 
-
+// 导入购物车的store
+import store from '@/store/carStore.js'
 new Vue({
     router,
+    store,
     render: h => h(App),
-    store
 }).$mount("#app");
