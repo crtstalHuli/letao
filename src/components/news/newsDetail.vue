@@ -131,7 +131,7 @@ export default {
     },
     created() {
         this.$parent.showNavBar({ title: "新闻列表" });
-        this.$parent.hideHeader();
+        // this.$parent.hideHeader();
         this.$parent.showFooter();
         this.getNewsDetail();
         this.getcommentsDataList();

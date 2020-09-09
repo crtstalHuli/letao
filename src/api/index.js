@@ -69,3 +69,43 @@ export async function getthumbimagesData(id) {
 export async function getShopCarsData(carIds) {
     return await instance.get(`/getshopcarlist/${carIds}`);
 }
+
+// 登录
+export async function userLogin(data){
+    return await instance.post(`/login`,data);
+}
+
+// 验证token
+export async function isLogin(){
+    let token = localStorage.getItem('token');
+    try{
+        await instance.post(`/checktoken?token=${token}`);
+    }catch(e){}
+}
+
+// 注册
+export async function userRegister(data){
+    return await instance.post(`/register`,data);
+}
+
+
+// 获取用户的收获地址
+export async function getUserAddress(userid){
+    return await instance.get(`/getaddress/${userid}?v=${Math.random()}`);
+}
+
+// 新增地址
+export async function addAddress(userid,addressInfo){
+    return await instance.post(`/addaddress/${userid}`,addressInfo);
+}
+
+// 用户编辑收货地址 /updateaddress/:address_id
+export async function editAddress(address_id,addressInfo){
+    return await instance.post(`/updateaddress/${address_id}`,addressInfo);
+}
+
+
+// 删除用户的收货地址 /deladdress/:address_id
+export async function delAddress(address_id){
+    return await instance.post(`/deladdress/${address_id}`);
+}

@@ -2,12 +2,17 @@
     <div class="car_container">
         <div v-if="hasGoods">
             <!-- 收货地址 -->
-            <van-divider>收货地址</van-divider>
-            <van-address-list
-                v-model="chosenAddressId"
-                :list="list"
-                default-tag-text="默认"
-            />
+            <div v-if="isShowAddr">
+                <van-divider>收货地址</van-divider>
+                <van-address-list
+                    v-model="chosenAddressId"
+                    :list="list"
+                    default-tag-text="默认"
+                />
+            </div>
+            <div v-else>
+                <a href="/address">前往添加地址</a>
+            </div>
 
             <!-- 购物车 -->
             <van-divider>购买的商品</van-divider>
@@ -83,7 +88,7 @@
             <div>
                 <img src="@/assets/images/car.png" alt="" />
             </div>
-            <div>
+            <div id="login">
                 <a href="#/login">登录</a>后可以同步电脑与手机购物车中的商品
             </div>
         </div>
@@ -91,7 +96,7 @@
 </template>
 
 <script>
-import { getShopCarsData } from "@/api/index.js";
+import { getShopCarsData, useraddress, getUserAddress } from "@/api/index.js";
 import {
     Switch,
     Stepper,
@@ -106,6 +111,8 @@ import {
 export default {
     data() {
         return {
+            isShowAddr:true,
+            isShowStar: true,
             isShow: true,
             checked: true,
             value: 1,
@@ -113,14 +120,14 @@ export default {
             carList: [],
             chosenAddressId: "1",
             list: [
-                {
-                    id: "1",
-                    name: "张三",
-                    tel: "13000000000",
-                    address:
-                        "浙江省杭州市西湖区文三路 138 号东方通信大厦 7 楼 501 室",
-                    isDefault: true
-                }
+                // {
+                //     id: "1",
+                //     name: "张三",
+                //     tel: "13000000000",
+                //     address:
+                //         "浙江省杭州市西湖区文三路 138 号东方通信大厦 7 楼 501 室",
+                //     isDefault: true
+                // }
             ]
         };
     },
@@ -142,6 +149,7 @@ export default {
     },
     methods: {
         onSubmit() {},
+
         // 获取我的购物车商品
         async getShopCarList() {
             let ids = this.$store.getters.getAllId;
@@ -152,12 +160,14 @@ export default {
             let { message } = await getShopCarsData(ids);
             this.carList = message;
         },
+
         // 删除购物车
         del(goodsid, index) {
             this.$store.commit("delGoodsAtCat", goodsid);
             // 同时删除当前的index
             this.carList.splice(index, 1);
         },
+
         // 修改商品的开关状态
         switchChange(goods_id, selected) {
             console.log(
@@ -166,18 +176,50 @@ export default {
             );
             this.$store.commit("changeGoodsSelected", { goods_id, selected });
         },
+
         // 修改商品数量
         stepperChaneg(goods_id, number) {
             console.log("购物车中的商品id：" + goods_id, "商品数量：" + number);
             this.$store.commit("changeGoodsNumber", { goods_id, number });
+        },
+
+        // 获取用户收货地址
+        async getaddress() {
+            let user_id = this.$store.state.userInfo.id;
+            let userAddr = await getUserAddress(user_id);
+
+            if(userAddr){
+
+                let index = userAddr.findIndex( (item) => {
+                    return item.isDefault == 1;
+                })
+
+                if(index > -1){
+
+                    let addr = userAddr[index];
+                    addr.address = addr.addressDetail;
+                    addr.isDefault = true;
+                    this.chosenAddressId = addr.id;
+
+                    this.list.push(addr);
+                    console.log(this.chosenAddressId);
+                    console.log(addr);
+
+                    this.isShowAddr = true;
+                }else {
+                    this.isShowAddr = false;
+                }
+
+            }
+
         }
     },
     created() {
         this.$parent.showNavBar({ title: "我的购物车" });
-        this.$parent.hideHeader();
         this.$parent.showFooter();
+
         this.getShopCarList();
-        console.log(this.getShopCarList());
+        this.getaddress();
     }
 };
 </script>

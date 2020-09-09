@@ -17,7 +17,7 @@
                 <img src="../../assets/images/menu19.png" alt />
                 <div>乐淘头条</div>
             </van-grid-item>
-            <van-grid-item to='/photo' icon="photo-o" text="文字">
+            <van-grid-item to="/photo" icon="photo-o" text="文字">
                 <img src="../../assets/images/menu18.png" alt />
                 <div>美图欣赏</div>
             </van-grid-item>
@@ -117,9 +117,13 @@ export default {
             this.$router.push(`/goodsDesc/${goodsId}`);
         }
     },
+    activated: function() {
+        this.$parent.hideNavBar();
+        this.$parent.showFooter();
+    },
     created() {
         this.$parent.hideNavBar();
-        this.$parent.showHeader();
+        // this.$parent.showHeader();
         this.$parent.showFooter();
         this.getlunbo();
         this.getRecommend();

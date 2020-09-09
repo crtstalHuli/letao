@@ -115,7 +115,7 @@ export default {
     },
     created() {
         this.$parent.showNavBar({ title: "美图欣赏" });
-        this.$parent.hideHeader();
+        // this.$parent.hideHeader();
         this.$parent.showFooter();
 
         this.getPhotoCate();

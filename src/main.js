@@ -19,7 +19,9 @@ Vue.use(Lazyload, {
 });
 
 // 导入购物车的store
-import store from '@/store/carStore.js'
+import store from '@/store/store.js'
+// 导入用户的store
+import userStore from '@/store/userStore.js'
 new Vue({
     router,
     store,

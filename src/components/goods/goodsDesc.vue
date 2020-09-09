@@ -1,5 +1,8 @@
 <template>
     <div class="goodsDesc_container">
+        <transition>
+           <van-icon name="star-o" color="red" />
+        </transition>
         <!-- 轮播图 -->
         <van-swipe class="my-swipe" :autoplay="3000" :indicator-color="'#ccc'" v-if="isLunbo">
             <van-swipe-item v-for="image in lunboimages" :key="image.src">
@@ -83,7 +86,8 @@ import {
 import {
     getGoodsDescData,
     getthgetumbimages,
-    getgoodsinfo
+    getgoodsinfo,
+    isLogin
 } from "@/api/index.js";
 
 export default {
@@ -105,7 +109,7 @@ export default {
         "van-goods-action": GoodsAction,
         "van-goods-action-icon": GoodsActionIcon,
         "van-goods-action-button": GoodsActionButton,
-        icon: Icon,
+        "van-icon": Icon,
         "van-swipe": Swipe,
         "van-swipe-item": SwipeItem,
         "van-divider": Divider,
@@ -132,6 +136,7 @@ export default {
         },
         // 加入购物车
         addmycar() {
+            isLogin();
             let goods = {
                 id:this.goodsInfo.id,
                 number:this.value,
@@ -144,12 +149,14 @@ export default {
     },
     created() {
         this.$parent.showNavBar({ title: "商品详情" });
-        this.$parent.hideHeader();
+        // this.$parent.hideHeader();
         this.$parent.hideFooter();
 
         this.getGoodsDesc();
         this.getthgetumbimagesData();
         this.getgoodsinfoData();
+
+
 
     }
 };
@@ -159,6 +166,9 @@ export default {
 .goodsDesc_container {
     padding: 5px 5px 50px 5px;
 
+    .van-icon {
+        position: absolute;
+    }
     .van-swipe {
         height: 240px;
         border-radius: 5px;

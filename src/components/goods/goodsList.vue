@@ -86,7 +86,7 @@ export default {
     },
     created() {
         this.$parent.showNavBar({ title: "商品列表" });
-        this.$parent.hideHeader();
+        // this.$parent.hideHeader();
         this.$parent.showFooter();
         this.getGoods();
     }

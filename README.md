@@ -257,4 +257,172 @@ display: -webkit-box;
 -webkit-line-clamp: 2;
 ```
 
+# axios+Vuex设置全局的loading提示效果
 
+1. 在vuex中的state设置一个变量isPending,记录是否在请求中，默认值为false
+
+   ```js
+   const Store = new Vuex.Store({
+     state: {
+           isPending: false
+     },
+      mutations: {
+           // 修改isPending的状态
+           changeIsPending(state, bool){
+               state.isPending = bool;
+           }
+      }
+   ```
+
+
+2. 在axios请求拦截器中，判断isPending是否为false, 是false,则通过mutation方式修改为true,在响应拦截器中，则通过mutation方式修改为false
+
+   ```js
+   import store from "@/store/carStore.js";
+   
+   // 添加请求拦截器
+   instance.interceptors.request.use(function (config) {
+       console.log('interceptors.request',store.state.isPending); // false
+     // 在发送请求之前做些什么
+     console.log(config);
+     // 设置自定义请求头(authorized-要求是https)携带token到后台，方便后台进行验证
+     var token = localStorage.getItem('token') || '';
+     token && ( config.headers.token = token )
+     // If-Modified-Since 是标准的HTTP请求头标签，在发送HTTP请求时，
+     // 把浏览器端缓存页面的最后修改时间一起发到服务器去，服务器会把这个时间与服务器上实际文件的最后修改时间进行比较
+     config.headers['If-Modified-Since'] = 0; //设置请求头，告诉服务端不要缓存，获取最新数据
+       // 设置对应的loading
+       !store.state.isPending && store.commit('changeIsPending',true)
+       console.log('interceptors.request',store.state.isPending); // true
+   
+     return config
+   }, function (error) {
+     // 对请求错误做些什么
+     return Promise.reject(error)
+   })
+   
+   
+   
+   // 添加响应拦截器
+   instance.interceptors.response.use(function (response) {
+     // 对响应数据做点什么
+     // 关闭loading
+     store.commit('changeIsPending',false)
+       
+     console.log('response.request',store.state.isPending); // false
+     return response.data
+   }, function (error) {
+       store.commit('changeIsPending',false)
+      
+   
+     return Promise.reject(error.response)
+   })
+   ```
+
+
+3. 在App.vue组件中watch监听isPending，统一给提示loading，true则loading, false则关闭loading
+
+   ```js
+   {
+       computed:{
+       //    isPending: function(){
+       //        return this.$store.state.isPending;
+       //    }
+       	//等价于
+       	...mapState(['isPending'])
+     	},
+     	watch:{
+         // 可以监听data和computed
+         "isPending":function(isPending){
+             console.log('watch',isPending)
+             //判断true还是false,给loading和关闭loading即可
+             isPending
+             ? this.$toast.loading({
+                  message: 'loading...',
+                   forbidClick: true,
+                   duration: 0, // 持续展示 toast
+             })
+             : this.$toast.clear()
+         }
+     },
+   }
+   
+   ```
+
+
+
+
+注意：
+
+- watch:可以监听data和computed
+
+- ```js
+   import { mapState } from "vuex"
+   data () {
+      return {
+        //isPending: this.$store.state.isPending, // data中监听不到属性的变化,但是computed是可以的
+      }
+   }，
+   computed:{
+         isPending: function(){
+             return this.$store.state.isPending;
+         }
+         // 等价于 
+         ...mapState([isPending])
+    },
+     
+   ```
+  ```
+
+
+
+# web性能优化常用的手段
+
+- 代码层面
+  - 代码结构（设计模式、靠经验）
+  - 代码压缩（提高速度）、合并(为了减少http请求)、雪碧图（精灵图），都是为了提高在网络间获取的速度。通过gulp和webpack（很多插件也可以实现优化代码）
+- 网络方面
+  - 请求： loading
+  - 服务器配置方面
+  - CDN加速, 目的是减去单台服务器的压力
+  - 图床。 目的是减去单台服务器的压力
+
+
+
+
+
+# 利用keepAlive缓存我们的组件
+
+1. 路由动态匹配的组件用keep-alive包裹起来 
+
+   参考：<https://cn.vuejs.org/v2/api/#keep-alive> 
+
+​```js
+
+    <!-- 中间(内容不能写死，这里放路由匹配的动态内容) -->
+    <!-- include: 指定哪些组件可以缓存，值为组件的name属性
+    <keep-alive include="home-component,newslist-component">
+         <router-view></router-view>
+    </keep-alive>
+    
+    export default {
+  		name: 'newslist-component',
+  	}
+  ```
+
+2. 当启用keep-alive后，触发组件的两个生命周期-活跃和不活跃
+
+```js
+ // 活跃
+ activated:function(){
+ 
+      this.$parent.showNavBar({ title: '新闻列表' })
+      console.log('activated')
+  },
+  // 活跃
+  deactivated:function(){
+    console.log('deactivated')
+  },
+```
+
+> 第二次切换被keep-alive缓存的组件，是不会触发组件的created生命周期，因为组件已经被创建过了，仅仅缓存起来了而已。

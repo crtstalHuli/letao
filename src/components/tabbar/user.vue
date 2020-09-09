@@ -4,12 +4,12 @@
             <van-cell>
                 <template #title>
                     <img src="../../assets/images/logo.png" alt="" />
-                    <div class="username">用户名:huli</div>
+                    <div class="username">用户名:{{$store.state.userInfo.username}}</div>
                 </template>
             </van-cell>
             <van-cell title="修改密码" is-link />
-            <van-cell title="我的订单" is-link />
-            <van-cell title="地v1.0.0址管理" is-link />
+            <van-cell title="我的订单" is-link to="/myorder" />
+            <van-cell title="地址管理" is-link to='/address' />
         </van-cell-group>
         <br />
         <van-cell title="提交反馈" is-link />
@@ -19,26 +19,53 @@
                 <a href="#">weixin h5 pay</a>
             </template>
         </van-cell>
-        <van-button type="default" block>退出登录</van-button>
+        <van-button type="default" block @click="aresure">退出登录</van-button>
     </div>
 </template>
 
 <script>
 import { mapState, mapMutations } from "vuex";
-import { Cell, CellGroup, Button } from "vant";
+import { Cell, CellGroup, Button, Dialog } from "vant";
+import { isLogin } from '@/api/index.js';
 export default {
     components: {
         "van-cell-group": CellGroup,
         "van-cell": Cell,
         "van-button": Button,
-        isShow: false
+        [Dialog.Component.name]: Dialog.Component
     },
-    computed: {},
-    methods: {},
+    computed: {
+        getUsername:function(){
+           let {username} = JSON.parse( localStorage.getItem('userInfo'));
+           return username;
+        }
+    },
+    methods: {
+        aresure() {
+            Dialog.confirm({
+                title: "确认退出登录？",
+                message: "",
+                confirmButtonColor:"#1989fa",
+
+            })
+                .then(() => {
+                    // on confirm
+                    // 点击确认退出，同时删除本地存储，返回登录页面
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('userInfo');
+                    this.$router.push('/login')
+                })
+                .catch(() => {
+                    // on cancel
+
+                });
+        }
+    },
     created() {
         this.$parent.showNavBar({ title: "个人中心" });
-        this.$parent.hideHeader();
+        // this.$parent.hideHeader();
         this.$parent.hideFooter();
+        isLogin();
     }
 };
 </script>
@@ -70,7 +97,8 @@ export default {
     .van-button {
         position: fixed;
         bottom: 0;
-        left: 0 ;
+        left: 0;
     }
+
 }
 </style>

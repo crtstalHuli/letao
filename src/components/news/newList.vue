@@ -38,6 +38,7 @@ import { PullRefresh } from "vant";
 import { getNewsData } from "@/api/index.js";
 import moment from "moment";
 export default {
+    name: "news-component",
     data() {
         return {
             newsList: [],
@@ -84,9 +85,16 @@ export default {
             }, 500);
         }
     },
+    activated: function() {
+        this.$parent.showNavBar({ title: "新闻列表" });
+        console.log("activated");
+    },
+    deactivated: function() {
+        console.log("deactivated");
+    },
     created() {
         this.$parent.showNavBar({ title: "新闻列表" });
-        this.$parent.hideHeader();
+        // this.$parent.hideHeader();
         this.$parent.showFooter();
         this.getNews();
     }
