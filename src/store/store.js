@@ -7,7 +7,7 @@ Vue.use(Vuex);
 // 取出本地存储中购物车商品，放到全局共享state中
 var carDatas = JSON.parse(localStorage.getItem("carData") || "[]");
 // 取出本地存储中用户数据，放到全局共享state中
-var userInfo = JSON.parse(localStorage.getItem('userInfo') || '[]');
+var userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
 const store = new Vuex.Store({
     state: {
         carData:carDatas,
@@ -47,7 +47,7 @@ const store = new Vuex.Store({
         // 删除购物车
         delGoodsAtCat(state,goods_id){
             let index = state.carData.findIndex(item =>item.id === goods_id);
-            console.log("删除购物车的下标："+index);
+            // console.log("删除购物车的下标："+index);
             state.carData.splice(index,1);
              //同步到本地存储
              localStorage.setItem("carData", JSON.stringify(state.carData));
@@ -131,7 +131,7 @@ const store = new Vuex.Store({
             state.carData.map( item =>{
                 obj[item.id] = item.number;
             })
-            console.log("购物车中的商品数量："+obj);
+            // console.log("购物车中的商品数量："+obj);
             return obj;
         },
 

@@ -9,8 +9,11 @@
             v-if="isShow"
         />
         <div class="no_address" v-else>
-            <van-divider>提示</van-divider>
-            <span>暂无地址，前往添加吧~</span>
+            <van-empty
+                class="custom-image"
+                image="https://img.yzcdn.cn/vant/custom-empty-image.png"
+                description="还没有收获地址哦，快去添加一个吧~"
+            />
             <van-button round type="info" block color="red" @click="onAdd"
                 >添加地址</van-button
             >
@@ -19,7 +22,7 @@
 </template>
 
 <script>
-import { AddressList, Divider, Button } from "vant";
+import { AddressList, Divider, Button, Empty } from "vant";
 import { getUserAddress } from "@/api/index.js";
 export default {
     data() {
@@ -41,24 +44,14 @@ export default {
                 //     tel: "1310000000",
                 //     address: "浙江省杭州市拱墅区莫干山路 50 号"
                 // }
-            ],
-            // disabledList: [
-            //     {
-            //         id: "3",
-            //         name: "王五",
-            //         tel: "1320000000",
-            //         address: "浙江省杭州市滨江区江南大道 15 号"
-            //     }
-            // ]
-
+            ]
         };
     },
     methods: {
-
         // 新增地址
         onAdd() {
             // this.$toast("新增地址");
-            this.$router.push('/addressadd')
+            this.$router.push("/addressadd");
         },
 
         // 编辑地址
@@ -74,20 +67,20 @@ export default {
             // let { id } = JSON.parse(localStorage.getItem("userInfo"));
             let id = this.$store.state.userInfo.id;
             let res = await getUserAddress(id);
-            if(res != ''){
+            if (res != "") {
                 let userAddrs = [];
                 res.map(item => {
                     item.address = item.addressDetail;
-                    if(item.isDefault == 1){
+                    if (item.isDefault == 1) {
                         item.isDefault = true;
-                        _this.chosenAddressId = item.id
-                    }else {
+                        _this.chosenAddressId = item.id;
+                    } else {
                         delete item.isDefault;
                     }
-                })
+                });
                 this.list = res;
                 this.isShow = true;
-            }else {
+            } else {
                 this.isShow = false;
             }
         }
@@ -95,7 +88,8 @@ export default {
     components: {
         "van-address-list": AddressList,
         "van-divider": Divider,
-        "van-button": Button
+        "van-button": Button,
+        "van-empty": Empty
     },
     created() {
         this.$parent.showNavBar({ title: "地址管理" });

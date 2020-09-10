@@ -68,7 +68,7 @@ export default {
         }
     },
     created() {
-        this.$parent.showNavBar({ title: "乐淘登录注册" });
+        this.$parent.showNavBar({ title: "登录" });
         this.$parent.showFooter();
 
     }

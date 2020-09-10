@@ -2,16 +2,34 @@
     <div class="car_container">
         <div v-if="hasGoods">
             <!-- 收货地址 -->
-            <div v-if="isShowAddr">
+            <div v-if="list.length > 0">
                 <van-divider>收货地址</van-divider>
                 <van-address-list
                     v-model="chosenAddressId"
                     :list="list"
                     default-tag-text="默认"
+                    @edit="onEdit"
                 />
             </div>
-            <div v-else>
-                <a href="/address">前往添加地址</a>
+            <div class="no_addr" v-else>
+                <van-divider>收货地址</van-divider>
+                <van-cell
+                    title="暂无默认地址"
+                    value="去设置"
+                    icon="location-o"
+                    to="/address"
+                    is-link
+                    v-if="isGoAddDefault"
+                />
+                 <van-cell
+                    title="暂无地址"
+                    value="去添加"
+                    icon="location-o"
+                    to="/addressadd"
+                    is-link
+                    v-else
+                />
+
             </div>
 
             <!-- 购物车 -->
@@ -88,7 +106,7 @@
             <div>
                 <img src="@/assets/images/car.png" alt="" />
             </div>
-            <div id="login">
+            <div id="login"  v-if="isLogin">
                 <a href="#/login">登录</a>后可以同步电脑与手机购物车中的商品
             </div>
         </div>
@@ -111,7 +129,10 @@ import {
 export default {
     data() {
         return {
-            isShowAddr:true,
+            // hasGoods:true, //判断购物车是否又数据
+            isLogin:false, //时候显示前往登录
+            isGoAddDefault: false, //新增地址和设置默认地址切换
+            isShowAddr: true, //
             isShowStar: true,
             isShow: true,
             checked: true,
@@ -144,7 +165,7 @@ export default {
     },
     computed: {
         hasGoods() {
-            return this.carList.length > 0;
+            return this.carList.length > 0 && JSON.parse( localStorage.getItem('userInfo') ) != null;
         }
     },
     methods: {
@@ -153,7 +174,7 @@ export default {
         // 获取我的购物车商品
         async getShopCarList() {
             let ids = this.$store.getters.getAllId;
-            console.log(ids);
+            // console.log(ids);
             if (!ids) {
                 return;
             }
@@ -170,16 +191,16 @@ export default {
 
         // 修改商品的开关状态
         switchChange(goods_id, selected) {
-            console.log(
-                "修改开关状态的商品id：" + goods_id,
-                "修改的状态：" + selected
-            );
+            // console.log(
+            //     "修改开关状态的商品id：" + goods_id,
+            //     "修改的状态：" + selected
+            // );
             this.$store.commit("changeGoodsSelected", { goods_id, selected });
         },
 
         // 修改商品数量
         stepperChaneg(goods_id, number) {
-            console.log("购物车中的商品id：" + goods_id, "商品数量：" + number);
+            // console.log("购物车中的商品id：" + goods_id, "商品数量：" + number);
             this.$store.commit("changeGoodsNumber", { goods_id, number });
         },
 
@@ -188,38 +209,51 @@ export default {
             let user_id = this.$store.state.userInfo.id;
             let userAddr = await getUserAddress(user_id);
 
-            if(userAddr){
-
-                let index = userAddr.findIndex( (item) => {
+            if (userAddr != "") {
+                let index = userAddr.findIndex(item => {
                     return item.isDefault == 1;
-                })
+                });
 
-                if(index > -1){
-
+                if (index > -1) {
                     let addr = userAddr[index];
                     addr.address = addr.addressDetail;
                     addr.isDefault = true;
                     this.chosenAddressId = addr.id;
 
                     this.list.push(addr);
-                    console.log(this.chosenAddressId);
-                    console.log(addr);
-
+                    // console.log(this.chosenAddressId);
+                    // console.log(addr);
                     this.isShowAddr = true;
-                }else {
+                } else {
                     this.isShowAddr = false;
+                    this.isGoAddDefault = true;
                 }
-
+            } else {
+                this.isGoAddDefault = false;
             }
+        },
 
-        }
-    },
+        onEdit(item, index) {
+            let userAddr = JSON.stringify(item);
+            // console.log(userAddr);
+            this.$router.push(`/addressedit/${userAddr}`)
+        },
+   },
     created() {
         this.$parent.showNavBar({ title: "我的购物车" });
         this.$parent.showFooter();
 
         this.getShopCarList();
         this.getaddress();
+
+        let userInfo = JSON.parse( localStorage.getItem('userInfo') );
+        if(userInfo){
+            this.isLogin = false;
+            console.log(this.isLogin);
+        }else {
+            this.isLogin = true;
+            console.log(this.isLogin);
+        }
     }
 };
 </script>
@@ -233,6 +267,14 @@ export default {
         color: #545e6c;
         font-size: 16px;
     }
+
+    // a {
+    //     display: block;
+    //     text-align: center;
+    //     span {
+    //         color: olivedrab;
+    //     }
+    // }
 
     .van-address-list {
         padding: 12px 12px 20px;

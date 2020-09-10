@@ -65,9 +65,10 @@ export default {
         goback() {
             let title = this.title;
 
+
             if (title === "地址管理") {
                 this.$router.push("/user");
-            } else if (title === "个人中心") {
+            } else if (title === "个人中心" || title === '登录') {
                 this.$router.push("/home");
             } else {
                 this.$router.go(-1);
@@ -101,7 +102,7 @@ export default {
     },
     watch: {
         isPending: function(isPending) {
-            console.log("watch", isPending);
+            // console.log("watch", isPending);
 
             isPending
                 ? this.$toast.loading({
