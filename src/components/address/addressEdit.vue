@@ -31,21 +31,21 @@ export default {
     },
     methods: {
         async onSave(addressInfo) {
-
+            // console.log(addressInfo);
             addressInfo.country = addressInfo.county;
             // addressInfo.areaCode = this.areaCode;
             console.log(addressInfo);
             let user_id = this.$store.state.userInfo.id;
 
-            if (addressInfo.isDefault) {
-                let addrList = await getUserAddress(user_id);
-                addrList.map(async item => {
-                    if (item.isDefault) {
-                        item.isDefault = false;
-                        await editAddress(item.id, item);
-                    }
-                });
-            }
+            // if (addressInfo.isDefault) {
+            //     let addrList = await getUserAddress(user_id);
+            //     addrList.map(async item => {
+            //         if (item.isDefault) {
+            //             item.isDefault = false;
+            //             await editAddress(item.id, item);
+            //         }
+            //     });
+            // }
             let addressid = addressInfo.id;
             let { status, message } = await editAddress(addressid, addressInfo);
             if (status == 0) {

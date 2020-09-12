@@ -21,7 +21,7 @@
                     is-link
                     v-if="isGoAddDefault"
                 />
-                 <van-cell
+                <van-cell
                     title="暂无地址"
                     value="去添加"
                     icon="location-o"
@@ -29,7 +29,6 @@
                     is-link
                     v-else
                 />
-
             </div>
 
             <!-- 购物车 -->
@@ -106,7 +105,7 @@
             <div>
                 <img src="@/assets/images/car.png" alt="" />
             </div>
-            <div id="login"  v-if="isLogin">
+            <div id="login" v-if="isLogin">
                 <a href="#/login">登录</a>后可以同步电脑与手机购物车中的商品
             </div>
         </div>
@@ -114,7 +113,12 @@
 </template>
 
 <script>
-import { getShopCarsData, useraddress, getUserAddress } from "@/api/index.js";
+import {
+    getShopCarsData,
+    useraddress,
+    getUserAddress,
+    commitOrder
+} from "@/api/index.js";
 import {
     Switch,
     Stepper,
@@ -124,13 +128,16 @@ import {
     AddressList,
     Cell,
     CellGroup,
-    Icon
+    Icon,
+    Dialog
 } from "vant";
+import { userInfo, genOrderId } from "@/util/tool.js";
+
 export default {
     data() {
         return {
             // hasGoods:true, //判断购物车是否又数据
-            isLogin:false, //时候显示前往登录
+            isLogin: false, //时候显示前往登录
             isGoAddDefault: false, //新增地址和设置默认地址切换
             isShowAddr: true, //
             isShowStar: true,
@@ -165,11 +172,60 @@ export default {
     },
     computed: {
         hasGoods() {
-            return this.carList.length > 0 && JSON.parse( localStorage.getItem('userInfo') ) != null;
+            // return this.carList.length > 0 && JSON.parse( localStorage.getItem('userInfo') ) != null;
+            return this.carList.length > 0;
+        },
+        total_price: function() {
+            return this.$store.getters.getSelectedGoodsPrice / 100;
+        },
+        number: function() {
+            return this.$store.getters.getSelectedGoodsNumber;
+        },
+        goods_ids: function() {
+            return this.$store.getters.getSelectedGoodsIds;
         }
     },
     methods: {
-        onSubmit() {},
+        async onSubmit() {
+            let user = userInfo();
+            // console.log(user);
+            if (!user) {
+                this.$router.push("/login");
+            }
+            if(!this.list[0]) {
+                this.$toast('暂无地址，请先添加地址再下单~');
+                return;
+            }
+            let order_id = genOrderId();
+            let orderData = {
+                user_id: user.id,
+                order_id: order_id,
+                address_id: this.list[0].id,
+                total_price: this.total_price,
+                number: this.number,
+                goods_ids: this.goods_ids
+            };
+            let _this = this;
+            this.$toast.loading({
+                message: "支付中...",
+                forbidClick: true,
+                duration: 1000,
+                onClose() {
+                    // 询问用户是否完成支付
+                    Dialog.alert({
+                        message: "支付是否完成"
+                    }).then(() => {
+                        _this.$router.push("/myorder");
+                    });
+                }
+            });
+
+            let res = await commitOrder(orderData);
+            var weixinpayurl = res.data;
+            // console.log(res)
+            location.href = weixinpayurl; //会主动唤起微信支付
+            this.$store.commit("delSuccessGodds", this.goods_ids);
+        },
 
         // 获取我的购物车商品
         async getShopCarList() {
@@ -213,6 +269,7 @@ export default {
                 let index = userAddr.findIndex(item => {
                     return item.isDefault == 1;
                 });
+                console.log("index" + index);
 
                 if (index > -1) {
                     let addr = userAddr[index];
@@ -221,6 +278,7 @@ export default {
                     this.chosenAddressId = addr.id;
 
                     this.list.push(addr);
+                    console.log("list:" + this.list);
                     // console.log(this.chosenAddressId);
                     // console.log(addr);
                     this.isShowAddr = true;
@@ -236,9 +294,9 @@ export default {
         onEdit(item, index) {
             let userAddr = JSON.stringify(item);
             // console.log(userAddr);
-            this.$router.push(`/addressedit/${userAddr}`)
-        },
-   },
+            this.$router.push(`/addressedit/${userAddr}`);
+        }
+    },
     created() {
         this.$parent.showNavBar({ title: "我的购物车" });
         this.$parent.showFooter();
@@ -246,11 +304,11 @@ export default {
         this.getShopCarList();
         this.getaddress();
 
-        let userInfo = JSON.parse( localStorage.getItem('userInfo') );
-        if(userInfo){
+        let userInfo = JSON.parse(localStorage.getItem("userInfo"));
+        if (userInfo) {
             this.isLogin = false;
             console.log(this.isLogin);
-        }else {
+        } else {
             this.isLogin = true;
             console.log(this.isLogin);
         }
@@ -267,14 +325,6 @@ export default {
         color: #545e6c;
         font-size: 16px;
     }
-
-    // a {
-    //     display: block;
-    //     text-align: center;
-    //     span {
-    //         color: olivedrab;
-    //     }
-    // }
 
     .van-address-list {
         padding: 12px 12px 20px;

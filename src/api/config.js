@@ -2,10 +2,14 @@ import axios from "axios";
 import { Toast } from "vant";
 import router from "@/router/index.js";
 import store from "@/store/store.js";
-import { sleep } from '@/util/tool.js';
+import { sleep } from "@/util/tool.js";
 
+console.log("process:" + process.env);
+console.log("process:" + process.env.VUE_APP_APIURL);
 const instance = axios.create({
-    baseURL: "http://api.w0824.com/api"
+    // baseURL: "http://api.homi168.com/api"
+    baseURL: "http://120.78.121.67:81/api"
+    // baseURL: "process.env.VUE_APP_APIURL"
 });
 
 // 添加请求拦截器
@@ -18,12 +22,11 @@ instance.interceptors.request.use(
 
         // If-Modified-Since 是标准的HTTP请求头标签，在发送HTTP请求时，
         // 把浏览器端缓存页面的最后修改时间一起发到服务器去，服务器会把这个时间与服务器上实际文件的最后修改时间进行比较
-        config.headers['If-Modified-Since'] = 0; //设置请求头，告诉服务端不要缓存，获取最新数据
-
+        config.headers["If-Modified-Since"] = 0; //设置请求头，告诉服务端不要缓存，获取最新数据
 
         // 设置对应loding
         !store.state.isPending && store.commit("changeIsPending", true);
-        await sleep(300)
+        await sleep(300);
         // console.log("interceptors.reuqest", store.state.isPending); //true
         return config;
     },

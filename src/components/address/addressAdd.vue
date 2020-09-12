@@ -35,21 +35,22 @@ export default {
             var user_id = userInfo.id;
 
             // 新增地址设置为默认则其他地址取消默认
-            if (addressInfo.isDefault) {
-                let addrList = await getUserAddress(user_id);
-                addrList.map(async (item) => {
-                    if(item.isDefault){
-                        item.isDefault = false;
-                        await editAddress(item.id,item);
-                    }
-                })
-            }
+            // if (addressInfo.isDefault) {
+            //     let addrList = await getUserAddress(user_id);
+            //     addrList.map(async (item) => {
+            //         if(item.isDefault){
+            //             item.isDefault = false;
+            //             await editAddress(item.id,item);
+            //         }
+            //     })
+            // }
 
             // 新增
             let { status, message } = await addAddress(user_id, addressInfo);
             if (status == 0) {
                 this.$router.push("/address");
             }
+            console.log("addressAdd:"+user_id,addressInfo);
         },
 
         onDelete() {

@@ -53,6 +53,22 @@ const store = new Vuex.Store({
              localStorage.setItem("carData", JSON.stringify(state.carData));
         },
 
+        // 批量删除下单成功的购物车
+        delSuccessGodds(state,goods_ids){
+            // console.log(state.carData);
+            let arr = [];
+            console.log(goods_ids);
+            console.log(state.carData);
+            state.carData.map( item => {
+                console.log(item);
+                if(goods_ids.indexOf(item.id) == -1){
+                    arr.push(item);
+                }
+            })
+            state.carData = arr;
+            localStorage.setItem('carData',JSON.stringify(arr));
+        },
+
         // 修改商品的开关状态
         changeGoodsSelected(state,obj){
             let index = state.carData.findIndex( item =>{
@@ -145,6 +161,17 @@ const store = new Vuex.Store({
             // console.log("获取商品的开关状态"+obj);
             return obj;
         },
+
+        // 获取选中的商品id
+        getSelectedGoodsIds(state) {
+            let arr = [];
+            state.carData.map( item => item.selected && arr.push(item.id));
+            let goodsIds = arr.join(',');
+            return goodsIds;
+        }
+
+
+
 
     },
     actions: {}

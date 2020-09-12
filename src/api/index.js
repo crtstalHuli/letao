@@ -91,7 +91,7 @@ export async function userRegister(data){
 
 // 获取用户的收获地址
 export async function getUserAddress(userid){
-    return await instance.get(`/getaddress/${userid}?v=${Math.random()}`);
+    return await instance.get(`/getaddress/${userid}`);
 }
 
 // 新增地址
@@ -108,4 +108,14 @@ export async function editAddress(address_id,addressInfo){
 // 删除用户的收货地址 /deladdress/:address_id
 export async function delAddress(address_id){
     return await instance.post(`/deladdress/${address_id}`);
+}
+
+// 提交订单 /commitorder
+export async function commitOrder(orderData){
+    return await instance.post(`/commitorder`,orderData);
+}
+
+// 获取订单 /userorder/:user_id
+export async function getUserOrder(user_id){
+    return await instance.post(`/userorder/${user_id}`);
 }
